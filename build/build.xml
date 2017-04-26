@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project default="deploy" name="Create Micro2 - Builds">
+	<description>Micro II</description>
+	<property name="vendor" value="Maximilian Schädlich"/>
+	
+	<property name="workspace.dir" location = "${basedir}/.."/>
+	<property name="lib.dir" location="${workspace.dir}/lib"/>
+	<property name="bin.dir" location="${workspace.dir}/bin"/>
+	<property name="build.dir" location="${basedir}"/>
+	<property name="jar.dir" location="${build.dir}/jar"/>
+	<target name="deploy" depends="cleanBuildPath">
+		<property file="build.properties"/>
+		<jar destfile="${jar.dir}/Micro2Server.jar" filesetmanifest="mergewithoutmain" manifest="MANIFEST.MF">
+		            <fileset dir="${bin.dir}"/>
+					<zipgroupfileset dir="${lib.dir}"/> 
+		</jar>
+	</target>
+	<target name="cleanBuildPath">
+		<delete>
+			<fileset dir="${build.dir}">
+				<include name="jar/**/*.*"/>
+				<include name="MANIFEST.MF"/>
+				<exclude name="build.xml"/>
+			</fileset>
+		</delete>
+		<manifest file="MANIFEST.MF">
+					<attribute name="Built-By" value="${vendor}"/>
+					<attribute name="Implementation-Version" value="1.0"/>
+					<attribute name="Built-Date" value="${TODAY}"/>
+					<attribute name="Main-Class" value="de.ddkfm.server.Micro2Server"/>
+		</manifest>
+	</target>
+</project>
