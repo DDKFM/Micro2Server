@@ -24,7 +24,7 @@
 		</delete>
 		<manifest file="MANIFEST.MF">
 					<attribute name="Built-By" value="${vendor}"/>
-					<attribute name="Implementation-Version" value="1.0"/>
+					<attribute name="Implementation-Version" value="1.1"/>
 					<attribute name="Built-Date" value="${TODAY}"/>
 					<attribute name="Main-Class" value="de.ddkfm.server.Micro2Server"/>
 		</manifest>
