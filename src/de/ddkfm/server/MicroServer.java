@@ -12,24 +12,22 @@ import com.sun.net.httpserver.HttpsServer;
 
 import de.ddkfm.db.DBAccess;
 
-public class Micro2Server {
+public class MicroServer {
 	/**
 	 * Setting for the HTTP-Server 
 	 */
 	private static int httpPort = 80;
 	private static int httpsPort = 443;
-	private static String contentPath = "micro2";
+	private static String contentPath = "micro";
 	private static boolean withHttps = false;
 	
 	/*
 	 * Settings for the Backend(DB or File-based)
 	 * 
 	 */
-	public static final int SAVEFORMAT_FILEBASED = 0;
 	public static final int SAVEFORMAT_MYSQL = 1;
 	
-	private static int saveFormat = SAVEFORMAT_FILEBASED;
-	private static String rootPath = "";
+	private static int saveFormat = SAVEFORMAT_MYSQL;
 	private static String dbHostname= "";
 	private static int dbPort = 3306;
 	private static String dbName = "";
@@ -38,21 +36,21 @@ public class Micro2Server {
 	
 	private static HttpServer httpServer;
 	private static HttpsServer httpsServer;
+
+	private static boolean httpIsAlive = false;
+	private static boolean httpsIsAlive = false;
 	public static void main(String[] args) {
 		Properties prop = new Properties();
 		try {
-			prop.load(new FileInputStream(new File("micro2Server.properties")));
+			prop.load(new FileInputStream(new File("microServer.properties")));
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		try {
-			Micro2Server.startServer(prop);
+			MicroServer.startServer(prop);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -69,32 +67,22 @@ public class Micro2Server {
 		if(properties.containsKey("micro2.server.context.path")) {
 			contentPath = properties.getProperty("micro2.server.context.path");
 		}
-		if(properties.containsKey("micro2.server.data.saveFormat")) {
-			String saveFormat = properties.getProperty("micro2.server.data.saveFormat");
-			switch(saveFormat.trim().toLowerCase()) {
-			case "mysql":
-				Micro2Server.saveFormat = Micro2Server.SAVEFORMAT_MYSQL;
-				break;
-			case "file":
-				Micro2Server.saveFormat = Micro2Server.SAVEFORMAT_FILEBASED;
-				break;
-			}
-		}
-		if(properties.containsKey("micro2.server.file.rootPath")) {
-			rootPath = properties.getProperty("micro2.server.file.rootPath");
-		}
 		if(properties.containsKey("micro2.server.database.hostname")) {
 			dbHostname = properties.getProperty("micro2.server.database.hostname");
-		}if(properties.containsKey("micro2.server.database.port")) {
+		}
+		if(properties.containsKey("micro2.server.database.port")) {
 			dbPort = Integer.parseInt(properties.getProperty("micro2.server.database.port"));
-		}if(properties.containsKey("micro2.server.database.name")) {
+		}
+		if(properties.containsKey("micro2.server.database.name")) {
 			dbName = properties.getProperty("micro2.server.database.name");
-		}if(properties.containsKey("micro2.server.database.username")) {
+		}
+		if(properties.containsKey("micro2.server.database.username")) {
 			dbUser = properties.getProperty("micro2.server.database.username");
-		}if(properties.containsKey("micro2.server.database.password")) {
+		}
+		if(properties.containsKey("micro2.server.database.password")) {
 			dbPassword = properties.getProperty("micro2.server.database.password");
 		}
-		Micro2Server.startServer();
+		MicroServer.startServer();
 	}
 	public static void startServer() throws IOException {
 		httpServer = HttpServer.create(new InetSocketAddress(httpPort), 0);
@@ -105,26 +93,36 @@ public class Micro2Server {
 		
 		DBAccess db = new DBAccess(dbHostname, Integer.toString(dbPort), dbName, dbUser, dbPassword);
 		
-		httpServer.createContext("/" + contentPath, new Micro2ServerHandler(db));
+		httpServer.createContext("/" + contentPath, new MicroServerHandler(db));
 		if(httpsServer != null)
-			httpsServer.createContext("/" + contentPath, new Micro2ServerHandler(db));
+			httpsServer.createContext("/" + contentPath, new MicroServerHandler(db));
 		
 		httpServer.start();
 		System.out.println("Http-Server auf Port " + httpPort + " gestartet");
+		httpIsAlive = true;
 		if(httpsServer != null) {
 			httpsServer.start();
 			System.out.println("Https-Server auf Port " + httpsPort + " gestartet");
+			httpsIsAlive = true;
 		}
 	}
 	public static void stopServer() {
 		if(httpServer != null) {
 			httpServer.stop(1);
 			System.out.println("HTTP-Server gestoppt");
+			httpIsAlive = false;
 		}
 		if(httpsServer != null) {
 			httpsServer.stop(1);
 			System.out.println("HTTPS-Server gestoppt");
+			httpsIsAlive = false;
 		}
+	}
+	public static Boolean httpIsAlive() {
+		return MicroServer.httpIsAlive;
+	}
+	public static Boolean httpsIsAlive() {
+		return MicroServer.httpsIsAlive;
 	}
 	
 

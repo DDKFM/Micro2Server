@@ -21,9 +21,9 @@ import com.sun.net.httpserver.HttpHandler;
 
 import de.ddkfm.db.DBAccess;
 
-public class Micro2ServerHandler implements HttpHandler {
+public class MicroServerHandler implements HttpHandler {
 	private DBAccess db;
-	public Micro2ServerHandler(DBAccess db) {
+	public MicroServerHandler(DBAccess db) {
 		this.db = db;
 	}
 	private Map<String, String> queryToMap(String query){
@@ -93,11 +93,9 @@ public class Micro2ServerHandler implements HttpHandler {
                     out.write(buffer, 0, count);
                 }
             } catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
         } catch (IOException e1) {
-			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
 	}

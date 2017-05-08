@@ -31,26 +31,6 @@ public class DBAccess {
 		String dbName = "micro2";
 		String user = "asdasd";
 		String password = "root";
-		if(System.getProperty("micro2.config.dir") != null){
-			Properties dbPropertes = new Properties();
-			String dbProp = System.getProperty("micro2.config.dir");
-			File dbFile = new File(dbProp + File.separator + "db.properties");
-			if(dbFile.exists()){
-				try {
-					dbPropertes.load(new FileInputStream(dbFile));
-					host = dbPropertes.getProperty("micro2web.db.host");
-					port = dbPropertes.getProperty("micro2web.db.port");
-					dbName = dbPropertes.getProperty("micro2web.db.dbName");
-					user = dbPropertes.getProperty("micro2web.db.user");
-					password = dbPropertes.getProperty("micro2web.db.password");
-				} catch (FileNotFoundException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (IOException e) {
-					
-				}
-			}
-		}
 		this.connect(host,port,dbName,user,password);
 	}
 	public DBAccess(String host, String port, String dbName, String username, String password) {
@@ -65,9 +45,58 @@ public class DBAccess {
 		}
 		try {
 			connection = DriverManager.getConnection("jdbc:mysql://" + host + ":" + port + "/" + dbName,user,password);
+			checkTableStructure();
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		}
+	}
+	private void checkTableStructure() {
+		try {
+			statement = connection.createStatement();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		String query =
+				"CREATE TABLE IF NOT EXISTS users (" +
+				"uid int AUTO_INCREMENT," +
+				"username varchar(50)," +
+				"password varchar(128)," +
+				"PRIMARY KEY(uid)" +
+				");";
+		boolean success = executeQuery(query);
+		query =
+				"CREATE TABLE IF NOT EXISTS data(" +
+				"dataId int AUTO_INCREMENT," +
+				"name varchar(50)," +
+				"data BLOB," +
+				"comment varchar(100)," +
+				"uid int," +
+				"PRIMARY KEY(dataId)" +
+				");";
+		success = executeQuery(query);
+	}
+	private List<Map<String, String>> getQuery(String query) {
+		List<Map<String, String>> result = new ArrayList<Map<String, String>>();
+		try {
+			ResultSet rs = statement.executeQuery(query);
+			while(rs.next()){
+				Map<String, String> map = new HashMap<String, String>();
+				result.add(map);
+            }
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return result;
+	}
+	private boolean executeQuery(String query) {
+		try {
+			boolean success = statement.execute(query);
+			return success;
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return false;
 		}
 	}
 	public boolean checkUser(String username, String password){

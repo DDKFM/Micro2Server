@@ -5,12 +5,11 @@
 	
 	<property name="workspace.dir" location = "${basedir}/.."/>
 	<property name="lib.dir" location="${workspace.dir}/lib"/>
-	<property name="bin.dir" location="${workspace.dir}/bin"/>
+	<property name="bin.dir" location="${workspace.dir}/out"/>
 	<property name="build.dir" location="${basedir}"/>
 	<property name="jar.dir" location="${build.dir}/jar"/>
 	<target name="deploy" depends="cleanBuildPath">
-		<property file="build.properties"/>
-		<jar destfile="${jar.dir}/Micro2Server.jar" filesetmanifest="mergewithoutmain" manifest="MANIFEST.MF">
+		<jar destfile="${jar.dir}/MicroServer.jar" filesetmanifest="mergewithoutmain" manifest="MANIFEST.MF">
 		            <fileset dir="${bin.dir}"/>
 					<zipgroupfileset dir="${lib.dir}"/> 
 		</jar>
